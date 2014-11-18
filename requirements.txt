@@ -1,0 +1,4 @@
+Jinjia2
+beautifulsoup4
+pillow
+feedparser

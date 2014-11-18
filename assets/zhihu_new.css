@@ -1,0 +1,44 @@
+ /* Style Definitions */
+
+p
+{
+	margin-top: 1em;
+	text-indent: 0em
+}
+
+.pagebreak
+{
+	page-break-before: always;
+}
+
+.centered
+{
+	text-align: center;
+}
+
+.bottom
+{
+	vertical-align: text-bottom;
+}
+
+.tablehead
+{
+	text-align: center;
+	font-weight: bold
+}
+
+H1 {margin-top: 1em}
+H2 {margin-top: 1em}
+H3 {margin-top: 1em}
+H4 {margin-top: 1em}
+
+.meta .avatar, .comment-meta .avatar {
+width: 20px;
+height: 20px;
+border-radius: 2px;
+margin-right: 5px;
+}
+
+.meta .bio, .highlight .gh, .highlight .bp {
+color: #999;
+}
