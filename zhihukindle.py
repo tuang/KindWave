@@ -15,7 +15,7 @@ import Queue
 from bs4 import BeautifulSoup
 from lib import escape
 from PIL import Image
-from config import TIMEZONE
+from config import TIMEZONE, OUTPUT_DIR
 
 imgq = Queue.Queue(0)
 
@@ -246,7 +246,8 @@ class ImageDownloader(threading.Thread):
 def main():
     print("Running ZhihuKindle...")
     print("-> Generating files...")
-    output_dir = "./output"
+    base_dir = os.path.split(os.path.realpath(__file__))[0]
+    output_dir = path.join(base_dir, OUTPUT_DIR)
     buildZhihu(output_dir)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -256,11 +257,11 @@ def main():
     if iswindows:
         kindlegen = "kindlegen.exe"
     elif islinux:
-        kindlegen = "./kindlegen"
+        kindlegen = "kindlegen"
     else:
-        kindlegen = "./kindlegen"
+        kindlegen = "kindlegen"
 
-    mobi(path.join(output_dir, 'daily.opf'), kindlegen)
+    mobi(path.join(output_dir, 'daily.opf'), path.join(base_dir, kindlegen))
     print("Done")
 
 

@@ -5,3 +5,5 @@ SMTP_PORT = 123
 SMTP_USER = 'aa@aa.com'
 SMTP_PWD = 'aa'
 TIMEZONE = 8
+OUTPUT_DIR = "output"
+

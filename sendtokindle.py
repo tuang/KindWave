@@ -4,7 +4,7 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
 from os import path
-from config import FROM, TO, SMTP_SERVER, SMTP_PORT, SMTP_PWD, SMTP_USER
+from config import FROM, TO, SMTP_SERVER, SMTP_PORT, SMTP_PWD, SMTP_USER, OUTPUT_DIR
 import mimetypes
 import smtplib
 import zhihukindle
@@ -16,7 +16,7 @@ sys.setdefaultencoding('utf8')
 
 if __name__ == "__main__":
     from sys import argv, exit
-    output_dir = "./output"
+    output_dir = path.join(path.split(path.realpath(__file__))[0], OUTPUT_DIR)
     if not len(argv) > 1:
         zhihukindle.main()
     print("-> Sending Email...")
@@ -33,7 +33,7 @@ if __name__ == "__main__":
         ctype = 'application/octet-stream'
     maintype, subtype = ctype.split('/', 1)
 
-    fp = open(output_dir + '/daily.mobi', 'rb')
+    fp = open(path.join(output_dir, "daily.mobi"), 'rb')
     part = MIMEBase(maintype, subtype)
     part.set_payload(fp.read())
     fp.close()
