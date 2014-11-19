@@ -15,6 +15,7 @@ import Queue
 from bs4 import BeautifulSoup
 from lib import escape
 from PIL import Image
+from config import TIMEZONE
 
 imgq = Queue.Queue(0)
 
@@ -23,6 +24,11 @@ sys.setdefaultencoding('utf8')
 
 templates_env = Environment(loader=PackageLoader('zhihukindle', 'templates_zhihu'))
 ROOT = path.dirname(path.abspath(__file__))
+
+iswindows = 'win23' in sys.platform.lower() or 'win64' in sys.platform.lower()
+isosx = 'darvim' in sys.platform.lower()
+isfreebsd = 'freebsd' in sys.platform.lower()
+islinux = not(iswindows or isosx or isfreebsd)
 
 
 def build(feed, output_dir):
@@ -46,10 +52,6 @@ def build(feed, output_dir):
 
     entry_number = 0
     for entry in feed['news']:
-        # We don't want old posts, just fresh news.
-        #if date.today() - date(*entry.date_parsed[0:3]) > max_old:
-        #    continue
-
         play_order += 1
         entry_number += 1
 
@@ -66,7 +68,7 @@ def build(feed, output_dir):
 
     # Wrap data and today's date in a dict to use the magic of **.
     wrap = {
-        'date': date.today().isoformat(),
+        'date': (date.today() + timedelta(hours = TIMEZONE)).isoformat(),
         'feeds': data,
     }
 
@@ -85,27 +87,33 @@ def build(feed, output_dir):
     # Copy the assets
     for name in listdir(path.join(ROOT, 'assets')):
         copy(path.join(ROOT, 'assets', name), path.join(output_dir, name))
-        # copytree(path.join(ROOT, 'assets'), output_dir)
 
 
 def parser_zhihu():
     """Parse Zhihu Daily API to JSON data"""
-    today = date.today().strftime("%Y%m%d")
+    today = (date.today() + timedelta(hours = TIMEZONE)).strftime("%Y%m%d")
     api_url = 'http://news.at.zhihu.com/api/1.2/news/before/' + today
     print(api_url)
-    daily_data = request(api_url)
+    daily_data = request(api_url, "")
     news = daily_data['news']
     for new in news:
-        new['content'] = request(new['url'])['body']
+        new['content'] = request(new['url'], api_url)['body']
     return daily_data
 
 
-def request(url):
+def request(url, request_url):
     """Resuest urls with headers"""
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.67 Safari/537.36'}
-    request = urllib2.Request(url, headers=headers)
-    return json.loads(urllib2.urlopen(request, timeout=30).read())
-
+    header = {
+        'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6',
+        'Referer': request_url,
+    }
+    req = urllib2.Request(
+        url=url.encode('utf-8'),
+        headers=header
+    )
+    opener = urllib2.build_opener()
+    response = opener.open(req, timeout=30)
+    return json.loads(response.read())
 
 def buildZhihu(output_dir):
     global imgq
@@ -235,21 +243,35 @@ class ImageDownloader(threading.Thread):
             logging.error("Failed: {}".format(e, i['url'].encode('utf-8')))
 
 
-if __name__ == "__main__":
-    from sys import argv, exit
-
-    def usage():
-        print("""DailyKindle usage: python zhihukindle.py""")
-
-    if not len(argv) > 0:
-        usage()
-        exit(64)
-
+def main():
     print("Running ZhihuKindle...")
     print("-> Generating files...")
     output_dir = "./output"
     buildZhihu(output_dir)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     print("-> Build the MOBI file using KindleGen...")
-    mobi(path.join(output_dir, 'daily.opf'), "kindlegen.exe")
+    kindlegen = ""
+    if iswindows:
+        kindlegen = "kindlegen.exe"
+    elif islinux:
+        kindlegen = "./kindlegen"
+    else:
+        kindlegen = "./kindlegen"
+
+    mobi(path.join(output_dir, 'daily.opf'), kindlegen)
     print("Done")
 
+
+if __name__ == "__main__":
+    from sys import argv, exit
+
+    def usage():
+        print("""KindWave usage: python zhihukindle.py""")
+
+    if not len(argv) > 0:
+        usage()
+        exit(64)
+    else:
+        main()

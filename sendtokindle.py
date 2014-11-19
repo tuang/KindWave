@@ -1,5 +1,4 @@
 from datetime import date, timedelta
-import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
@@ -7,21 +6,19 @@ from email import encoders
 from os import path
 from config import FROM, TO, SMTP_SERVER, SMTP_PORT, SMTP_PWD, SMTP_USER
 import mimetypes
+import smtplib
 import zhihukindle
 import sys
 
 reload(sys)
 sys.setdefaultencoding('utf8')
 
+
 if __name__ == "__main__":
     from sys import argv, exit
     output_dir = "./output"
     if not len(argv) > 1:
-        print("Running ZhihuKindle...")
-        print("-> Generating files...")
-        zhihukindle.buildZhihu(output_dir)
-        print("-> Build the MOBI file using KindleGen...")
-        zhihukindle.mobi(path.join(output_dir, 'daily.opf'), "kindlegen.exe")
+        zhihukindle.main()
     print("-> Sending Email...")
 
     msg = MIMEMultipart()
