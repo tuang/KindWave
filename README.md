@@ -5,7 +5,7 @@ A Kindle sender for Zhihu Daily(For Now).
 
 ## Requirements
 
-* A working Python 2 environment (tested on Win + Python 2.7.5 + Virtualenv).
+* A working Python 2 environment (tested on Win32 and Linux with Python 2.7).
 * [Amazon's KindleGen](http://www.amazon.com/gp/feature.html?docId=1000234621)
   binary.
 
